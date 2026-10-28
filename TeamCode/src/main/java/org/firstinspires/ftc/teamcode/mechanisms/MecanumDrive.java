@@ -32,6 +32,12 @@ public class MecanumDrive {
     // strafing goes ~10% shorter than the wheels turn, this makes up for it. Tune on the field
     static final double STRAFE_CORRECTION = 1.1;
 
+    // drive() is backwards from the robot's real front (TeleOp flips the sticks to make up for it,
+    // and the park auto drove backward at comp). These make the auto moves match the real robot:
+    // driveDistance(+) = real forward, strafeDistance(+) = real right
+    static final double AUTO_FORWARD_SIGN = -1;
+    static final double AUTO_RIGHT_SIGN = -1;
+
     private DcMotorEx frontLeft, backLeft, frontRight, backRight;
     private IMU imu; //built in gyro sensor in ftc
 
@@ -132,12 +138,13 @@ public class MecanumDrive {
                                  LinearOpMode opMode){
         // all 4 wheels spin the same way to drive straight
         double[] wheelDirections = {1, 1, 1, 1};
-        return moveDistance(inches, wheelDirections, maxWheelRpm, timeoutSeconds, opMode);
+        return moveDistance(AUTO_FORWARD_SIGN * inches, wheelDirections, maxWheelRpm,
+                timeoutSeconds, opMode);
     }
 
     /*
      * Autonomous: strafes sideways without turning
-     * positive inches = same way as positive strafe in drive(), negative = the other way
+     * positive inches = robot's right, negative = robot's left
      * Same speed cap and hit detection as driveDistance
      */
     public boolean strafeDistance(double inches, double maxWheelRpm, double timeoutSeconds,
@@ -145,7 +152,7 @@ public class MecanumDrive {
         // same wheel pattern as strafing in drive(): front left, back left, front right, back right
         double[] wheelDirections = {1, -1, -1, 1};
         // mecanum rollers slip a little when strafing, so the wheels have to turn a bit more
-        return moveDistance(inches * STRAFE_CORRECTION, wheelDirections, maxWheelRpm,
+        return moveDistance(AUTO_RIGHT_SIGN * inches * STRAFE_CORRECTION, wheelDirections, maxWheelRpm,
                 timeoutSeconds, opMode);
     }
 
